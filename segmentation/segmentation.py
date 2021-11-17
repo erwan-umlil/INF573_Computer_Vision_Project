@@ -1,6 +1,7 @@
 from torchvision import models
 from PIL import Image
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import torch
 import torchvision.transforms as T
 import numpy as np
@@ -111,5 +112,8 @@ final[mask>0.1,:,:] = 1
 plt.imshow(final)
 plt.show()
 
+# Save the preprocessed image and the mask
 f = T.ToPILImage()(final.transpose(1, 2).transpose(0, 1))
 f.save("segmented_images/s_" + name,"PNG")
+m = Image.fromarray(np.uint8(cm.gist_earth(mask)*255))
+m.save("segmented_images/s_" + name[:-4] + "_mask.png", "PNG")

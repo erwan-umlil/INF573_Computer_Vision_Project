@@ -112,4 +112,4 @@ plt.imshow(final)
 plt.show()
 
 f = T.ToPILImage()(final.transpose(1, 2).transpose(0, 1))
-f.save("preprocessed_images/s_" + name,"PNG")
+f.save("segmented_images/s_" + name,"PNG")

@@ -76,8 +76,9 @@ def decode_segmap(image, nc=21):
 fcn = models.segmentation.fcn_resnet101(pretrained=True).eval()
 
 # Load image
-img_path = 'images/car.png'
-#img_path = 'images/bird.png'
+name = 'car.png'
+#name = 'bird.png'
+img_path = 'images/' + name
 img = Image.open(img_path)
 original_size = img.size
 img_sq = expand2square(img, (0,0,0))
@@ -108,3 +109,6 @@ final[mask>0.1,:,:] = 1
 # Show the result
 plt.imshow(final)
 plt.show()
+
+f = T.ToPILImage()(final.transpose(1, 2).transpose(0, 1))
+f.save("preprocessed_images/s_" + name,"PNG")

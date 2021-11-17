@@ -77,11 +77,17 @@ def decode_segmap(image, nc=21):
 fcn = models.segmentation.fcn_resnet101(pretrained=True).eval()
 
 # Load image
-name = 'birds.png'
+#name = 'birds.png'
 #name = 'car.png'
-#name = 'bird.png'
+name = 'woman.png'
 img_path = 'images/' + name
 img = Image.open(img_path).convert('RGB')
+# Crop to have even size
+img = img.crop((0, 0, 4*(img.size[0]//4), 4*(img.size[1]//4)))
+if img.size[0] >= img.size[1]:
+    img = img.resize((640, int(img.size[1] * 640 / img.size[0])))
+else:
+    img = img.resize((int(img.size[0] * 640 / img.size[1]), img.size[1]))
 original_size = img.size
 img_sq = expand2square(img, (0,0,0))
 squared_size = img_sq.size[0]

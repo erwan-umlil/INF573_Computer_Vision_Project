@@ -6,6 +6,7 @@ import torch
 import torchvision.transforms as T
 import numpy as np
 import cv2 as cv
+import argparse
 
 
 # We can also use T.Pad
@@ -47,10 +48,11 @@ def threshold_mask(mask, threshold):
     gray_img[gray_img<threshold] = 0
     return gray_img
 
-def decode_segmap(image, nc=21):
+def decode_segmap(image, labels_to_remove, nc=21):
     """
     Return a RGB image corresponding to image, which is a raw output of the network
     """
+    assert(max(labels_to_remove) < nc)
     label_colors = np.array([(0, 0, 0),  # 0=background
                # 1=aeroplane, 2=bicycle, 3=bird, 4=boat, 5=bottle
                (128, 0, 0), (0, 128, 0), (128, 128, 0), (0, 0, 128), (128, 0, 128),
@@ -63,7 +65,7 @@ def decode_segmap(image, nc=21):
     r = np.zeros_like(image).astype(np.uint8)
     g = np.zeros_like(image).astype(np.uint8)
     b = np.zeros_like(image).astype(np.uint8)
-    for l in range(0, nc):
+    for l in labels_to_remove:
         idx = image == l
         r[idx] = label_colors[l, 0]
         g[idx] = label_colors[l, 1]
@@ -71,55 +73,69 @@ def decode_segmap(image, nc=21):
     rgb = np.stack([r, g, b], axis=2)
     return rgb
 
+def preprocess_image(image):
+    """Preprocess input image to have a size 4*n and resize it"""
+    img = image.crop((0, 0, 4*(image.size[0]//4), 4*(image.size[1]//4)))
+    if img.size[0] >= img.size[1]:
+        img = img.resize((640, int(img.size[1] * 640 / img.size[0])))
+    else:
+        img = img.resize((int(img.size[0] * 640 / img.size[1]), img.size[1]))
+    return img
 
 
-# Load resnet101 pretrained model
-fcn = models.segmentation.fcn_resnet101(pretrained=True).eval()
+def segment(img_path, output_path, remove_labels):
+    """Segment the input image, erase the objects described by remove_labels and save the result and the mask"""
+    name = img_path.split('/')[-1][:-4]
+    # Load resnet101 pretrained model
+    fcn = models.segmentation.fcn_resnet101(pretrained=True).eval()
 
-# Load image
-#name = 'birds.png'
-#name = 'car.png'
-name = 'woman.png'
-img_path = 'images/' + name
-img = Image.open(img_path).convert('RGB')
-# Crop to have even size
-img = img.crop((0, 0, 4*(img.size[0]//4), 4*(img.size[1]//4)))
-if img.size[0] >= img.size[1]:
-    img = img.resize((640, int(img.size[1] * 640 / img.size[0])))
-else:
-    img = img.resize((int(img.size[0] * 640 / img.size[1]), img.size[1]))
-original_size = img.size
-img_sq = expand2square(img, (0,0,0))
-squared_size = img_sq.size[0]
+    img = Image.open(img_path).convert('RGB')
+    img = preprocess_image(img)
+    original_size = img.size
+    img_sq = expand2square(img, (0,0,0))
+    squared_size = img_sq.size[0]
+
+    # Transform image to fit with resnet input size
+    trf = T.Compose([T.Resize(224), T.ToTensor(), T.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])])
+    inp = trf(img_sq).unsqueeze(0)
+
+    # Forward through the network
+    out = fcn(inp)['out']
+
+    # Analyze the output
+    om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
+    rgb = decode_segmap(om, remove_labels)
+
+    # Transform the output mask
+    inv_trf = T.Compose([T.ToPILImage(), T.Resize(squared_size), T.ToTensor(), T.Normalize(mean = [-0.485, -0.456, -0.406], std=[1,1,1]), T.Normalize(mean=[0,0,0], std = [1/0.229, 1/0.224, 1/0.225])])
+    mask = inv_trf(rgb).transpose(0, 1).transpose(1, 2)
+    mask = square2original(mask, original_size).numpy()
+    mask = threshold_mask(mask, 0.1)
+
+    # Apply the mask to the original picture
+    final = T.ToTensor()(img).transpose(0, 1).transpose(1, 2)
+    final[mask>0.1,:,:] = 1
+
+    # Show the result
+    plt.imshow(final)
+    plt.show()
+
+    # Save the preprocessed image and the mask
+    f = T.ToPILImage()(final.transpose(1, 2).transpose(0, 1))
+    f.save(output_path + "s_" + name + '.png', "PNG")
+    m = Image.fromarray(np.uint8(cm.gist_earth(mask) * 255))
+    m.save(output_path + "s_" + name + "_mask.png", "PNG")
 
 
-# Transform image to fit with resnet input size
-trf = T.Compose([T.Resize(224), T.ToTensor(), T.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])])
-inp = trf(img_sq).unsqueeze(0)
 
-# Forward through the network
-out = fcn(inp)['out']
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--image', type=str, default='', help='path to the input image')
+    parser.add_argument('--output', type=str, default='segmented_images/', help='path where the output image will be saved')
+    parser.add_argument('--remove', type=str, default='15', help='labels of objects to remove, e.g. 1,2,3,4')
 
-# Analysis of the output
-om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
-rgb = decode_segmap(om)
+    args = parser.parse_args()
+    remove_labels = args.remove.split(',')
+    remove_labels = list(map(int, remove_labels))
 
-# Transformation of the output mask
-inv_trf = T.Compose([T.ToPILImage(), T.Resize(squared_size), T.ToTensor(), T.Normalize(mean = [-0.485, -0.456, -0.406], std=[1,1,1]), T.Normalize(mean=[0,0,0], std = [1/0.229, 1/0.224, 1/0.225])])
-mask = inv_trf(rgb).transpose(0, 1).transpose(1, 2)
-mask = square2original(mask, original_size).numpy()
-mask = threshold_mask(mask, 0.1)
-
-# Apply the mask to the original picture
-final = T.ToTensor()(img).transpose(0, 1).transpose(1, 2)
-final[mask>0.1,:,:] = 1
-
-# Show the result
-plt.imshow(final)
-plt.show()
-
-# Save the preprocessed image and the mask
-f = T.ToPILImage()(final.transpose(1, 2).transpose(0, 1))
-f.save("segmented_images/s_" + name,"PNG")
-m = Image.fromarray(np.uint8(cm.gist_earth(mask)*255))
-m.save("segmented_images/s_" + name[:-4] + "_mask.png", "PNG")
+    segment(args.image, args.output, remove_labels)

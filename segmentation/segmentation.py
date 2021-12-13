@@ -80,6 +80,7 @@ def preprocess_image(image):
         img = img.resize((640, int(img.size[1] * 640 / img.size[0])))
     else:
         img = img.resize((int(img.size[0] * 640 / img.size[1]), img.size[1]))
+    img = img.crop((0, 0, 4*(img.size[0]//4), 4*(img.size[1]//4)))
     return img
 
 

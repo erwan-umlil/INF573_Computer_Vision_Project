@@ -51,6 +51,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
+The different scripts have only been tested on PNG images.
 ### Whole pipeline using SinGAN editing and heat naive colouring
 #### CPU
 ```
@@ -71,7 +72,34 @@ python3 main_singan_paint2image.py --input_name car.png --remove 7 --heat_epochs
 python3 main_singan_paint2image.py --input_name car.png --remove 7 --heat_epochs 10  --ref_name car_heat.png --paint_start_scale 2
 ```
 
-We provide the possibility to test the different modules one by one (see README in each folder).
+We provide the possibility to test the different modules one by one.
+
+### Segmentation alone
+```
+python3 segmentation.py --image images/car.png --output output/segmentation --remove 7
+```
+
+### cv2 colouring alone
+```
+python3 diffusion/cv2_inpainting.py
+```
+
+### Naive colouring alone
+```
+python3 diffusion/naive.py
+```
+
+### Heat equation colouring alone
+```
+python3 diffusion/heat.py --image output/segmentation/s_car.png --mask output/segmentation/s_car_mask.png
+```
+
+### SinGAN alone
+Please follow the instructions to install and use SinGAN there: https://github.com/tamarott/SinGAN
+
+### edge-connect alone
+Please follow the instructions to install and use edge-connect there: https://github.com/knazeri/edge-connect
+
 
 ## List of supported objects to remove and their code number
 0: background

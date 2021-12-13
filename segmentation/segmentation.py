@@ -131,11 +131,15 @@ def segment(img_path, remove_labels):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--image', type=str, help='path to the input image', required=True)
-    parser.add_argument('--output', type=str, default='segmented_images', help='path where the output image will be saved')
+    parser.add_argument('--output', type=str, default='output/segmentation', help='path where the output image will be saved')
     parser.add_argument('--remove', type=str, default='15', help='labels of objects to remove, e.g. 1,2,3,4')
 
     args = parser.parse_args()
     remove_labels = args.remove.split(',')
     remove_labels = list(map(int, remove_labels))
 
-    segment(args.image, args.output, remove_labels)
+    f, m = segment(args.image, args.output, remove_labels)
+
+    name = args.image.split('/')[-1][:-4]
+    f.save(args.output + "/s_" + name + '.png', "PNG")
+    m.save(args.output + "/s_" + name + "_mask.png", "PNG")

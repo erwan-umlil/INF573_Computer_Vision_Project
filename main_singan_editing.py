@@ -33,7 +33,10 @@ if __name__ == "__main__":
     print('Segmentation...')
     remove_labels = args.remove.split(',')
     remove_labels = list(map(int, remove_labels))
-    _, m = segment(args.input_dir + '/' + args.input_name, args.output_segmentation, remove_labels)
+    f, m = segment(args.input_dir + '/' + args.input_name, remove_labels)
+    name = args.input_name.split('/')[-1][:-4]
+    f.save(args.output_segmentation + "/s_" + name + '.png', "PNG")
+    m.save(args.output_segmentation + "/s_" + name + "_mask.png", "PNG")
     m.save(args.ref_dir + "/" + args.ref_name[:-4] + "_mask.png", "PNG")
 
     # Inpainting using heat equation

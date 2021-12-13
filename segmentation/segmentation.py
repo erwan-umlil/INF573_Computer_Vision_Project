@@ -83,9 +83,8 @@ def preprocess_image(image):
     return img
 
 
-def segment(img_path, output_path, remove_labels):
+def segment(img_path, remove_labels):
     """Segment the input image, erase the objects described by remove_labels and save the result and the mask"""
-    name = img_path.split('/')[-1][:-4]
     # Load resnet101 pretrained model
     fcn = models.segmentation.fcn_resnet101(pretrained=True).eval()
 
@@ -122,9 +121,7 @@ def segment(img_path, output_path, remove_labels):
 
     # Save the preprocessed image and the mask
     f = T.ToPILImage()(final.transpose(1, 2).transpose(0, 1))
-    f.save(output_path + "/s_" + name + '.png', "PNG")
     m = Image.fromarray(np.uint8(cm.gist_earth(mask) * 255))
-    m.save(output_path + "/s_" + name + "_mask.png", "PNG")
 
     return f, m
 

@@ -9,7 +9,7 @@ from skimage import io as img
 from skimage import color, morphology, filters
 #from skimage import morphology
 #from skimage import filters
-from SinGAN.imresize import imresize
+from SinGAN.SinGAN.imresize import imresize
 import os
 import random
 from sklearn.cluster import KMeans
@@ -235,10 +235,10 @@ def load_trained_pyramid(opt, mode_='train'):
         opt.mode = mode
     dir = generate_dir2save(opt)
     if(os.path.exists(dir)):
-        Gs = torch.load('%s/Gs.pth' % dir)
-        Zs = torch.load('%s/Zs.pth' % dir)
-        reals = torch.load('%s/reals.pth' % dir)
-        NoiseAmp = torch.load('%s/NoiseAmp.pth' % dir)
+        Gs = torch.load('%s/Gs.pth' % dir, map_location=opt.device)
+        Zs = torch.load('%s/Zs.pth' % dir, map_location=opt.device)
+        reals = torch.load('%s/reals.pth' % dir, map_location=opt.device)
+        NoiseAmp = torch.load('%s/NoiseAmp.pth' % dir, map_location=opt.device)
     else:
         print('no appropriate trained model is exist, please train first')
     opt.mode = mode
@@ -256,7 +256,7 @@ def generate_in2coarsest(reals,scale_v,scale_h,opt):
 def generate_dir2save(opt):
     dir2save = None
     if (opt.mode == 'train') | (opt.mode == 'SR_train'):
-        dir2save = 'TrainedModels/%s/scale_factor=%f,alpha=%d' % (opt.input_name[:-4], opt.scale_factor_init,opt.alpha)
+        dir2save = 'SinGAN/TrainedModels/%s/scale_factor=%f,alpha=%d' % (opt.input_name[:-4], opt.scale_factor_init,opt.alpha)
     elif (opt.mode == 'animation_train') :
         dir2save = 'TrainedModels/%s/scale_factor=%f_noise_padding' % (opt.input_name[:-4], opt.scale_factor_init)
     elif (opt.mode == 'paint_train') :

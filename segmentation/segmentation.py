@@ -117,21 +117,23 @@ def segment(img_path, output_path, remove_labels):
     final[mask>0.1,:,:] = 1
 
     # Show the result
-    plt.imshow(final)
-    plt.show()
+    # plt.imshow(final)
+    # plt.show()
 
     # Save the preprocessed image and the mask
     f = T.ToPILImage()(final.transpose(1, 2).transpose(0, 1))
-    f.save(output_path + "s_" + name + '.png', "PNG")
+    f.save(output_path + "/s_" + name + '.png', "PNG")
     m = Image.fromarray(np.uint8(cm.gist_earth(mask) * 255))
-    m.save(output_path + "s_" + name + "_mask.png", "PNG")
+    m.save(output_path + "/s_" + name + "_mask.png", "PNG")
+
+    return f, m
 
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--image', type=str, default='', help='path to the input image')
-    parser.add_argument('--output', type=str, default='segmented_images/', help='path where the output image will be saved')
+    parser.add_argument('--image', type=str, help='path to the input image', required=True)
+    parser.add_argument('--output', type=str, default='segmented_images', help='path where the output image will be saved')
     parser.add_argument('--remove', type=str, default='15', help='labels of objects to remove, e.g. 1,2,3,4')
 
     args = parser.parse_args()

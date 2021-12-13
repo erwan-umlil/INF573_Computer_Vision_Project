@@ -1,10 +1,10 @@
 from __future__ import print_function
-import SinGAN.functions
+import SinGAN.SinGAN.functions
 import SinGAN.models
 import argparse
 import os
 import random
-from SinGAN.imresize import imresize
+from SinGAN.SinGAN.imresize import imresize
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
@@ -17,8 +17,8 @@ from skimage import color
 import math
 import imageio
 import matplotlib.pyplot as plt
-from SinGAN.training import *
-from config import get_arguments
+from SinGAN.SinGAN.training import *
+from SinGAN.config import get_arguments
 
 def generate_gif(Gs,Zs,reals,NoiseAmp,opt,alpha=0.1,beta=0.9,start_scale=2,fps=10):
 

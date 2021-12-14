@@ -4,9 +4,9 @@ from matplotlib import cm
 import numpy as np
 from tqdm import tqdm
 
-img = Image.open('diffusion/s_bird.png').convert('RGB')
+img = Image.open('diffusion/img/s_bird.png').convert('RGB')
 img = np.array(img)
-mask = Image.open('diffusion/s_bird_mask.png').convert('L')
+mask = Image.open('diffusion/img/s_bird_mask.png').convert('L')
 mask = np.array(mask).astype(float)
 mask /= np.max(mask)
 

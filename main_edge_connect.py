@@ -10,8 +10,8 @@ if __name__ == "__main__":
     parser.add_argument('--remove', type=str, default='15', help='labels of objects to remove, e.g. 1,2,3,4')
     parser.add_argument('--path', '--checkpoints', type=str, default='edge_connect/checkpoints/places2', help='model checkpoints path (default: edge_connect/checkpoints/places2)')
     parser.add_argument('--model', type=int, choices=[1, 2, 3, 4], help='1: edge model, 2: inpaint model, 3: edge-inpaint model, 4: joint model', default=4)
-    parser.add_argument('--input', type=str, help='path where we store the segmented image')
-    parser.add_argument('--mask', type=str, help='path where we store mask file')
+    parser.add_argument('--input', type=str, help='path where we store the segmented image', required=True)
+    parser.add_argument('--mask', type=str, help='path where we store mask file', required=True)
     parser.add_argument('--edge', type=str, help='path to an edge file')
     parser.add_argument('--output', type=str, help='path to the output directory (default: output/edge_connect)', default='output/edge_connect')
 

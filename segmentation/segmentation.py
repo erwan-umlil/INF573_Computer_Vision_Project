@@ -73,9 +73,9 @@ def decode_segmap(image, labels_to_remove, nc=21):
     rgb = np.stack([r, g, b], axis=2)
     return rgb
 
-def preprocess_image(image):
+def preprocess_image(img):
     """Preprocess input image to have a size 4*n and resize it"""
-    img = image.crop((0, 0, 4*(image.size[0]//4), 4*(image.size[1]//4)))
+    # img = img.crop((0, 0, 4*(img.size[0]//4), 4*(img.size[1]//4)))
     if img.size[0] >= img.size[1]:
         img = img.resize((640, int(img.size[1] * 640 / img.size[0])))
     else:

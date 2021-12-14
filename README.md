@@ -83,6 +83,11 @@ python3 main_singan_paint2image.py --input_name car.png --remove 7 --heat_epochs
 python3 main_singan_paint2image.py --input_name car.png --remove 7 --heat_epochs 10  --ref_name car_heat.png --paint_start_scale 2
 ```
 
+### Whole pipeline using edge-connect
+```
+python3 main_edge_connect.py --input_img images/bird.png --remove 7 --input output/segmentation/bird.png --mask output/segmentation/bird_mask.png
+```
+
 We provide the possibility to test the different modules one by one.
 
 ### Segmentation alone

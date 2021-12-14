@@ -52,6 +52,17 @@ pip install -r requirements.txt
 
 ## Usage
 The different scripts have only been tested on PNG images.
+
+### Training SinGAN
+#### CPU
+```
+python3 main_singan_train.py --input_name car.png --not_cuda
+```
+#### GPU
+```
+python3 main_singan_train.py --input_name car.png
+```
+
 ### Whole pipeline using SinGAN editing and heat naive colouring
 #### CPU
 ```
